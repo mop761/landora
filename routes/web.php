@@ -1,7 +1,30 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 
+/*
+|--------------------------------------------------------------------------
+| Rutas web de Landora
+|--------------------------------------------------------------------------
+*/
+
+// La raíz lleva al panel; si no hay sesión, el middleware 'auth' redirige al login.
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('dashboard');
+});
+
+// Rutas solo para invitados (sin sesión iniciada).
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
+});
+
+// Rutas solo para usuarios autenticados.
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
