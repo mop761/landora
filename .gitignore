@@ -25,3 +25,7 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Carpeta de salidas de Claude y copias sueltas de archivos de entorno
+/Claude outputs/
+*.env
