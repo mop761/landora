@@ -20,7 +20,14 @@
 
     <main class="content">
         <h1>Bienvenido a Landora</h1>
-        <p class="muted">Has iniciado sesión correctamente. Desde aquí gestionarás tus landing pages.</p>
+        <p class="muted">
+            Has iniciado sesión como <strong>{{ auth()->user()->name }}</strong>
+            — rol: <strong>{{ auth()->user()->isAdmin() ? 'Administrador' : 'Editor' }}</strong>.
+        </p>
+
+        @if (auth()->user()->isAdmin())
+            <a class="link-btn" href="{{ route('admin') }}">Ir a la zona de administración</a>
+        @endif
     </main>
 </div>
 @endsection

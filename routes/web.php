@@ -27,4 +27,9 @@ Route::middleware('auth')->group(function () {
     })->name('dashboard');
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    // Zona de administración: solo para usuarios con rol 'admin'.
+    Route::get('/admin', function () {
+        return view('admin');
+    })->middleware('role:admin')->name('admin');
 });

@@ -13,12 +13,23 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Usuario de administración para poder entrar al panel.
+        // Usuario administrador.
         User::updateOrCreate(
             ['email' => 'admin@landora.test'],
             [
                 'name' => 'Administrador',
                 'password' => Hash::make('password'),
+                'role' => 'admin',
+            ]
+        );
+
+        // Usuario editor (para probar los permisos).
+        User::updateOrCreate(
+            ['email' => 'editor@landora.test'],
+            [
+                'name' => 'Editor',
+                'password' => Hash::make('password'),
+                'role' => 'editor',
             ]
         );
     }
