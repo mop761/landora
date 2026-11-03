@@ -11,11 +11,14 @@
     --muted:#64748b;
     --danger:#b91c1c;
     --danger-bg:#fef2f2;
+    --ok:#065f46;
+    --ok-bg:#ecfdf5;
     --radius:12px;
     --font:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
 }
 *{box-sizing:border-box}
 body{margin:0;font-family:var(--font);color:var(--ink);background:var(--bg);line-height:1.5}
+a{color:var(--accent)}
 
 /* Marca */
 .brand{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:-.02em}
@@ -43,8 +46,15 @@ body{margin:0;font-family:var(--font);color:var(--ink);background:var(--bg);line
 .alert{background:var(--danger-bg);color:var(--danger);border:1px solid #fecaca;border-radius:8px;
     padding:9px 11px;font-size:13px;margin-bottom:6px}
 
-/* ---- Panel ---- */
-.app-shell{min-height:100vh;display:flex;flex-direction:column}
+/* ---- Estructura del panel (sidebar + contenido) ---- */
+.layout{display:flex;min-height:100vh}
+.sidebar{width:220px;flex:none;background:var(--ink);color:#fff;padding:18px 14px}
+.sidebar .brand{color:#fff;margin-bottom:24px;padding-left:4px}
+.nav a{display:block;padding:9px 12px;border-radius:8px;color:#cbd5e1;text-decoration:none;font-weight:600;
+    font-size:14px;margin-bottom:4px}
+.nav a:hover{background:rgba(255,255,255,.08);color:#fff}
+.nav a.active{background:var(--accent);color:#fff}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
 .topbar{display:flex;align-items:center;justify-content:space-between;background:var(--panel);
     border-bottom:1px solid var(--line);padding:12px 20px}
 .topbar-right{display:flex;align-items:center;gap:14px}
@@ -52,9 +62,44 @@ body{margin:0;font-family:var(--font);color:var(--ink);background:var(--bg);line
 .btn-ghost{border:1px solid #cbd5e1;background:#fff;color:var(--ink);padding:7px 13px;border-radius:8px;
     font:inherit;font-weight:600;font-size:13px;cursor:pointer;text-decoration:none;display:inline-block}
 .btn-ghost:hover{background:var(--bg)}
-.content{padding:32px 20px;max-width:900px;width:100%;margin:0 auto}
-.content h1{font-size:24px;letter-spacing:-.02em;margin:0 0 8px}
+.content{padding:28px 24px;max-width:920px;width:100%;margin:0 auto}
+.content h1{font-size:24px;letter-spacing:-.02em;margin:0 0 10px}
 .muted{color:var(--muted)}
+
+/* ---- Tarjetas, formularios y tablas ---- */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;
+    margin-bottom:16px;box-shadow:0 1px 2px rgba(15,23,42,.05)}
+.card h2{font-size:15px;margin:0 0 12px}
+.inline-form{display:flex;gap:10px}
+.inline-form input{flex:1;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit;font-size:14px}
+.inline-form input:focus{outline:2px solid var(--blue-200);border-color:var(--accent)}
+.btn-sm{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:10px 18px;font-weight:700;
+    font-size:14px;cursor:pointer}
+.btn-sm:hover{filter:brightness(1.05)}
+.err{color:var(--danger);font-size:13px;margin:8px 0 0}
+.flash{background:var(--ok-bg);color:var(--ok);border:1px solid #a7f3d0;border-radius:8px;
+    padding:10px 12px;font-size:14px;margin-bottom:16px}
 .link-btn{display:inline-block;margin-top:16px;padding:10px 16px;border-radius:8px;background:var(--accent);
     color:#fff;text-decoration:none;font-weight:600;font-size:14px}
 .link-btn:hover{filter:brightness(1.05)}
+
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);
+    font-weight:700;padding:8px 10px;border-bottom:1px solid var(--line)}
+.tbl td{padding:11px 10px;border-bottom:1px solid var(--line);font-size:14px}
+.tbl tr:last-child td{border-bottom:0}
+.tbl code{background:var(--bg);padding:2px 6px;border-radius:5px;font-size:13px}
+.badge{background:var(--sky);color:var(--blue-900);border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600}
+.right{text-align:right}
+.btn-del{background:#fff;color:var(--danger);border:1px solid #fecaca;border-radius:7px;padding:6px 12px;
+    font:inherit;font-weight:600;font-size:13px;cursor:pointer}
+.btn-del:hover{background:var(--danger-bg)}
+
+/* ---- Responsive ---- */
+@media (max-width:700px){
+    .layout{flex-direction:column}
+    .sidebar{width:100%;display:flex;align-items:center;gap:16px;padding:12px 16px}
+    .sidebar .brand{margin-bottom:0}
+    .nav{display:flex;gap:4px}
+    .nav a{margin-bottom:0}
+}

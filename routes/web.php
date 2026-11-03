@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\LandingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,6 +28,11 @@ Route::middleware('auth')->group(function () {
     })->name('dashboard');
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    // Gestión de landings.
+    Route::get('/landings', [LandingController::class, 'index'])->name('landings.index');
+    Route::post('/landings', [LandingController::class, 'store'])->name('landings.store');
+    Route::delete('/landings/{landing}', [LandingController::class, 'destroy'])->name('landings.destroy');
 
     // Zona de administración: solo para usuarios con rol 'admin'.
     Route::get('/admin', function () {
