@@ -39,12 +39,15 @@
                         <td><code>/{{ $landing->slug }}</code></td>
                         <td><span class="badge">{{ $landing->status }}</span></td>
                         <td class="right">
-                            <form method="POST" action="{{ route('landings.destroy', $landing) }}"
-                                  onsubmit="return confirm('¿Eliminar esta landing?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn-del">Eliminar</button>
-                            </form>
+                            <div style="display:inline-flex;gap:8px;align-items:center">
+                                <a class="btn-ghost" href="{{ route('landings.editor', $landing) }}">Editar</a>
+                                <form method="POST" action="{{ route('landings.destroy', $landing) }}"
+                                      onsubmit="return confirm('¿Eliminar esta landing?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn-del">Eliminar</button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 @endforeach

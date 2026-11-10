@@ -32,6 +32,8 @@ Route::middleware('auth')->group(function () {
     // Gestión de landings.
     Route::get('/landings', [LandingController::class, 'index'])->name('landings.index');
     Route::post('/landings', [LandingController::class, 'store'])->name('landings.store');
+    Route::get('/landings/{landing}/editor', [LandingController::class, 'edit'])->name('landings.editor');
+    Route::put('/landings/{landing}/layout', [LandingController::class, 'updateLayout'])->name('landings.layout');
     Route::delete('/landings/{landing}', [LandingController::class, 'destroy'])->name('landings.destroy');
 
     // Zona de administración: solo para usuarios con rol 'admin'.

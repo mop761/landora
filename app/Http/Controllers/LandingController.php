@@ -40,6 +40,32 @@ class LandingController extends Controller
     }
 
     /**
+     * Muestra el editor visual de una landing.
+     */
+    public function edit(Landing $landing)
+    {
+        abort_unless($landing->user_id === auth()->id(), 403);
+
+        return view('landings.editor', compact('landing'));
+    }
+
+    /**
+     * Guarda el diseño (layout JSON) de la landing. Lo llama el editor por AJAX.
+     */
+    public function updateLayout(Request $request, Landing $landing)
+    {
+        abort_unless($landing->user_id === auth()->id(), 403);
+
+        $data = $request->validate([
+            'layout' => ['nullable', 'array'],
+        ]);
+
+        $landing->update(['layout' => $data['layout'] ?? []]);
+
+        return response()->json(['ok' => true]);
+    }
+
+    /**
      * Elimina una landing (solo su propietario).
      */
     public function destroy(Landing $landing)

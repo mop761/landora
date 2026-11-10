@@ -15,7 +15,18 @@ class Landing extends Model
         'name',
         'slug',
         'status',
+        'layout',
     ];
+
+    /**
+     * Conversión de tipos: el diseño se guarda y se recupera como array (JSON).
+     */
+    protected function casts(): array
+    {
+        return [
+            'layout' => 'array',
+        ];
+    }
 
     /**
      * La landing pertenece a un usuario (su propietario).
