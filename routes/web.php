@@ -41,3 +41,8 @@ Route::middleware('auth')->group(function () {
         return view('admin');
     })->middleware('role:admin')->name('admin');
 });
+
+// Página pública de la landing (sin login). Se enlaza por el slug.
+// Va al final a propósito: así no intercepta rutas como /login o /dashboard,
+// que están definidas antes y tienen prioridad.
+Route::get('/{landing:slug}', [LandingController::class, 'show'])->name('landings.show');

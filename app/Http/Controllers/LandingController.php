@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Landing;
+use App\Support\LandingRenderer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -63,6 +64,21 @@ class LandingController extends Controller
         $landing->update(['layout' => $data['layout'] ?? []]);
 
         return response()->json(['ok' => true]);
+    }
+
+    /**
+     * Página pública de la landing (la ve cualquiera, sin login).
+     * Renderiza el diseño JSON a HTML usando LandingRenderer.
+     *
+     * De momento se muestra en cualquier estado; la protección de borradores
+     * (solo visibles las publicadas) se añade en el siguiente paso.
+     */
+    public function show(Landing $landing)
+    {
+        $html = LandingRenderer::render($landing->layout);
+        $customCss = LandingRenderer::customCss($landing->layout);
+
+        return view('landings.public', compact('landing', 'html', 'customCss'));
     }
 
     /**
