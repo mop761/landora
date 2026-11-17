@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Landing extends Model
 {
@@ -34,5 +35,13 @@ class Landing extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Una landing tiene muchos leads (los contactos capturados por su formulario).
+     */
+    public function leads(): HasMany
+    {
+        return $this->hasMany(Lead::class);
     }
 }

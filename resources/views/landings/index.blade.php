@@ -29,6 +29,7 @@
                     <th>Nombre</th>
                     <th>Slug</th>
                     <th>Estado</th>
+                    <th>Leads</th>
                     <th></th>
                 </tr>
             </thead>
@@ -37,10 +38,26 @@
                     <tr>
                         <td>{{ $landing->name }}</td>
                         <td><code>/{{ $landing->slug }}</code></td>
-                        <td><span class="badge">{{ $landing->status }}</span></td>
+                        <td>
+                            @if ($landing->status === 'published')
+                                <span class="badge" style="background:#dcfce7;color:#166534">Publicada</span>
+                            @else
+                                <span class="badge" style="background:#f1f5f9;color:#64748b">Borrador</span>
+                            @endif
+                        </td>
+                        <td>
+                            <a class="btn-ghost" href="{{ route('landings.leads', $landing) }}">{{ $landing->leads_count }}</a>
+                        </td>
                         <td class="right">
                             <div style="display:inline-flex;gap:8px;align-items:center">
+                                @if ($landing->status === 'published')
+                                    <a class="btn-ghost" href="{{ route('landings.show', $landing->slug) }}" target="_blank">Ver</a>
+                                @endif
                                 <a class="btn-ghost" href="{{ route('landings.editor', $landing) }}">Editar</a>
+                                <form method="POST" action="{{ route('landings.publish', $landing) }}">
+                                    @csrf
+                                    <button type="submit" class="btn-sm">{{ $landing->status === 'published' ? 'Despublicar' : 'Publicar' }}</button>
+                                </form>
                                 <form method="POST" action="{{ route('landings.destroy', $landing) }}"
                                       onsubmit="return confirm('¿Eliminar esta landing?')">
                                     @csrf

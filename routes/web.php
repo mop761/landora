@@ -34,6 +34,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/landings', [LandingController::class, 'store'])->name('landings.store');
     Route::get('/landings/{landing}/editor', [LandingController::class, 'edit'])->name('landings.editor');
     Route::put('/landings/{landing}/layout', [LandingController::class, 'updateLayout'])->name('landings.layout');
+    Route::post('/landings/{landing}/publish', [LandingController::class, 'togglePublish'])->name('landings.publish');
+    Route::get('/landings/{landing}/leads', [LandingController::class, 'leads'])->name('landings.leads');
     Route::delete('/landings/{landing}', [LandingController::class, 'destroy'])->name('landings.destroy');
 
     // Zona de administración: solo para usuarios con rol 'admin'.
@@ -42,7 +44,7 @@ Route::middleware('auth')->group(function () {
     })->middleware('role:admin')->name('admin');
 });
 
-// Página pública de la landing (sin login). Se enlaza por el slug.
-// Va al final a propósito: así no intercepta rutas como /login o /dashboard,
-// que están definidas antes y tienen prioridad.
+// Rutas públicas de la landing (sin login), enlazadas por el slug.
+// Van al final a propósito: así no interceptan rutas como /login o /dashboard.
 Route::get('/{landing:slug}', [LandingController::class, 'show'])->name('landings.show');
+Route::post('/{landing:slug}', [LandingController::class, 'storeLead'])->name('landings.lead');

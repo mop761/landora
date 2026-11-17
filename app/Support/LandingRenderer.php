@@ -10,22 +10,26 @@ namespace App\Support;
  * objetos en el navegador. Aquí lo recorremos en el servidor para generar
  * la página final. Esta "serialización" del diseño a HTML es lógica propia
  * del proyecto: no la resuelve Laravel, la escribimos nosotros.
- *
- * Estructura del árbol:
- *   [
- *     'customCss' => '...',
- *     'sections'  => [
- *        [ 'dir','bg','padY','gap','align','max', 'elements' => [ ... ] ],
- *     ],
- *   ]
  */
 class LandingRenderer
 {
+    /** URL a la que se envía el formulario de la landing (captura de leads). */
+    private static string $formAction = '';
+
+    /** Token CSRF que acompaña al envío del formulario. */
+    private static string $csrf = '';
+
     /**
      * Devuelve el HTML de todas las secciones de la landing.
+     *
+     * $context puede traer 'action' (URL de envío del formulario) y 'csrf'
+     * (token de seguridad). Si no vienen, el formulario se muestra pero no envía.
      */
-    public static function render(?array $layout): string
+    public static function render(?array $layout, array $context = []): string
     {
+        self::$formAction = $context['action'] ?? '';
+        self::$csrf = $context['csrf'] ?? '';
+
         if (empty($layout['sections']) || ! is_array($layout['sections'])) {
             return '<p style="text-align:center;color:#64748b;padding:60px 24px">'
                 . 'Esta landing todavía no tiene contenido.</p>';
@@ -195,12 +199,16 @@ class LandingRenderer
         $buttonBg    = self::color($el['buttonBg'] ?? '#3B82F6');
         $buttonColor = self::color($el['buttonColor'] ?? '#ffffff');
         $margin      = $align === 'center' ? '0 auto' : '0';
+        $styles      = 'max-width:420px;margin:' . $margin . ';display:flex;flex-direction:column;gap:10px';
 
-        // De momento el formulario se muestra pero no envía nada: la captura
-        // real de leads se añade en el siguiente paso. onsubmit="return false"
-        // evita que se recargue la página al pulsar el botón.
-        $html = '<form onsubmit="return false" '
-            . 'style="max-width:420px;margin:' . $margin . ';display:flex;flex-direction:column;gap:10px">';
+        // Si tenemos la URL de envío, el formulario es real (POST con token CSRF).
+        // Si no (p. ej. una previsualización sin contexto), se muestra pero no envía.
+        if (self::$formAction !== '') {
+            $html = '<form method="POST" action="' . self::esc(self::$formAction) . '" style="' . $styles . '">'
+                . '<input type="hidden" name="_token" value="' . self::esc(self::$csrf) . '">';
+        } else {
+            $html = '<form onsubmit="return false" style="' . $styles . '">';
+        }
 
         foreach (($el['fields'] ?? []) as $f) {
             if (is_array($f)) {

@@ -22,8 +22,19 @@
             overflow: hidden;
             box-shadow: 0 1px 2px rgba(15,23,42,.06), 0 6px 18px rgba(15,23,42,.06);
         }
+        .aviso {
+            max-width: 880px;
+            margin: 24px auto -8px;
+            padding: 12px 16px;
+            background: #dcfce7;
+            color: #166534;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+        }
         @media (max-width: 880px) {
             .paper { margin: 0; border-radius: 0; }
+            .aviso { margin: 0 0 8px; border-radius: 0; }
         }
     </style>
 
@@ -31,6 +42,11 @@
     <style>{!! $customCss !!}</style>
 </head>
 <body>
+    {{-- Mensaje de confirmación tras enviar el formulario --}}
+    @if (request()->query('ok'))
+        <div class="aviso">¡Gracias! Hemos recibido tus datos.</div>
+    @endif
+
     <div class="paper">
         {{-- El HTML ya viene saneado desde LandingRenderer --}}
         {!! $html !!}
