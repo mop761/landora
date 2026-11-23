@@ -32,16 +32,22 @@
                     <button class="pal-btn" data-add="text"><span class="ico">¶</span>Texto</button>
                     <button class="pal-btn" data-add="button"><span class="ico">▭</span>Botón</button>
                     <button class="pal-btn" data-add="image"><span class="ico">▣</span>Imagen</button>
+                    <button class="pal-btn" data-add="video"><span class="ico">▶</span>Vídeo</button>
                     <button class="pal-btn" data-add="form"><span class="ico">≣</span>Formulario</button>
                     <button class="pal-btn" data-add="section"><span class="ico">▤</span>Sección</button>
                 </div>
-                <div class="hint">Se añade a la sección seleccionada (o al final).</div>
+                <div class="hint">Se añade debajo del elemento seleccionado, en su misma columna.</div>
+            </div>
+            <div class="group">
+                <h3>Estructura</h3>
+                <div class="tree" id="tree"></div>
+                <div class="hint">Pulsa un nombre para seleccionarlo; usa ↑ ↓ para ordenar.</div>
             </div>
             <div class="group">
                 <h3>Plantillas base</h3>
                 <div class="tpl" id="templates">
                     <button class="tpl-btn" data-tpl="hero">Título + formulario</button>
-                    <button class="tpl-btn" data-tpl="split">Título izq. / form dcha.</button>
+                    <button class="tpl-btn" data-tpl="split">Imagen de fondo + texto / formulario</button>
                 </div>
                 <div class="hint">Reemplaza el diseño actual.</div>
             </div>

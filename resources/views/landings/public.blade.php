@@ -8,33 +8,23 @@
         * { box-sizing: border-box; }
         body {
             margin: 0;
-            background: #eef2f7;
+            background: #fff;
             color: #0f172a;
             font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
         }
-        /* El "lienzo" reproduce el mismo contenedor que se ve en el editor,
-           para que la página publicada coincida con lo que diseñó el usuario. */
-        .paper {
-            background: #fff;
-            max-width: 880px;
-            margin: 24px auto;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 1px 2px rgba(15,23,42,.06), 0 6px 18px rgba(15,23,42,.06);
-        }
+        /* Cada sección ocupa todo el ancho; el ancho del contenido lo decide la propia sección. */
         .aviso {
-            max-width: 880px;
-            margin: 24px auto -8px;
             padding: 12px 16px;
             background: #dcfce7;
             color: #166534;
-            border-radius: 10px;
             text-align: center;
             font-weight: 600;
         }
-        @media (max-width: 880px) {
-            .paper { margin: 0; border-radius: 0; }
-            .aviso { margin: 0 0 8px; border-radius: 0; }
+        img, video, iframe { max-width: 100%; }
+        /* En móvil, las columnas se apilan una debajo de otra. */
+        @media (max-width: 760px) {
+            .lnd-cols { grid-template-columns: minmax(0, 1fr) !important; }
+            section { padding-left: 16px !important; padding-right: 16px !important; }
         }
     </style>
 
@@ -47,9 +37,9 @@
         <div class="aviso">¡Gracias! Hemos recibido tus datos.</div>
     @endif
 
-    <div class="paper">
+    <main>
         {{-- El HTML ya viene saneado desde LandingRenderer --}}
         {!! $html !!}
-    </div>
+    </main>
 </body>
 </html>
