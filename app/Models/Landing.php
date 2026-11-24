@@ -47,6 +47,14 @@ class Landing extends Model
     }
 
     /**
+     * Visitas registradas a la página pública (para la analítica).
+     */
+    public function visits(): HasMany
+    {
+        return $this->hasMany(LandingVisit::class);
+    }
+
+    /**
      * Historial de envíos al webhook de esta landing.
      */
     public function webhookDeliveries(): HasMany

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Landing;
 use App\Models\Lead;
 use App\Support\LandingRenderer;
+use App\Support\VisitTracker;
 use App\Support\WebhookSender;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -96,6 +97,12 @@ class LandingController extends Controller
     {
         $esPropietario = auth()->check() && auth()->id() === $landing->user_id;
         abort_unless($landing->status === 'published' || $esPropietario, 404);
+
+        // Se cuenta la visita para la analítica. No cuentan las del propietario (previsualizar)
+        // ni la recarga que se produce tras enviar el formulario (?ok=1).
+        if ($landing->status === 'published' && ! $esPropietario && ! $request->query('ok')) {
+            VisitTracker::record($request, $landing);
+        }
 
         // Si la visita llega desde una campaña (?utm_source=...), se guardan las UTM
         // en campos ocultos del formulario para saber de dónde viene cada lead.
