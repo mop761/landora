@@ -54,6 +54,7 @@
                                     <a class="btn-ghost" href="{{ route('landings.show', $landing->slug) }}" target="_blank">Ver</a>
                                 @endif
                                 <a class="btn-ghost" href="{{ route('landings.editor', $landing) }}">Editar</a>
+                                <a class="btn-ghost" href="{{ route('landings.analytics', $landing) }}">Analítica</a>
                                 <a class="btn-ghost" href="{{ route('landings.webhook', $landing) }}" title="Webhook">Webhook{{ $landing->webhook_url ? ' ✓' : '' }}</a>
                                 <form method="POST" action="{{ route('landings.publish', $landing) }}">
                                     @csrf

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\WebhookController;
@@ -24,9 +25,8 @@ Route::middleware('guest')->group(function () {
 
 // Rutas solo para usuarios autenticados.
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    // Panel principal con el resumen de analítica de todas las landings.
+    Route::get('/dashboard', [AnalyticsController::class, 'dashboard'])->name('dashboard');
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -37,6 +37,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/landings/{landing}/layout', [LandingController::class, 'updateLayout'])->name('landings.layout');
     Route::post('/landings/{landing}/publish', [LandingController::class, 'togglePublish'])->name('landings.publish');
     Route::get('/landings/{landing}/leads', [LandingController::class, 'leads'])->name('landings.leads');
+    Route::get('/landings/{landing}/analytics', [AnalyticsController::class, 'landing'])->name('landings.analytics');
     Route::delete('/landings/{landing}', [LandingController::class, 'destroy'])->name('landings.destroy');
 
     // Webhook de cada landing: configuración, prueba y reintentos.

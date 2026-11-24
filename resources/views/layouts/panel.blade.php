@@ -4,7 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Landora')</title>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    {{-- ?v=fecha del archivo: si cambia, el navegador descarga la versión nueva --}}
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ filemtime(public_path('css/app.css')) }}">
 </head>
 <body>
 <div class="layout">
