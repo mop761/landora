@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Lead extends Model
 {
@@ -13,6 +15,11 @@ class Lead extends Model
     protected $fillable = [
         'landing_id',
         'data',
+        'utm_source',
+        'utm_medium',
+        'utm_campaign',
+        'ip',
+        'user_agent',
     ];
 
     /**
@@ -31,5 +38,21 @@ class Lead extends Model
     public function landing(): BelongsTo
     {
         return $this->belongsTo(Landing::class);
+    }
+
+    /**
+     * Todos los envíos de este lead al webhook (incluidos los reintentos).
+     */
+    public function deliveries(): HasMany
+    {
+        return $this->hasMany(WebhookDelivery::class);
+    }
+
+    /**
+     * El último envío al webhook, para mostrar su estado en el listado de leads.
+     */
+    public function latestDelivery(): HasOne
+    {
+        return $this->hasOne(WebhookDelivery::class)->latestOfMany();
     }
 }

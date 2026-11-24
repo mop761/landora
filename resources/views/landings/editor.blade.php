@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Editor · {{ $landing->name }} · Landora</title>
-    <link rel="stylesheet" href="{{ asset('css/editor.css') }}">
+    {{-- ?v=fecha del archivo: si el archivo cambia, el navegador descarga la versión nueva (evita la caché) --}}
+    <link rel="stylesheet" href="{{ asset('css/editor.css') }}?v={{ filemtime(public_path('css/editor.css')) }}">
 </head>
 <body>
 <div id="app">
@@ -74,6 +75,6 @@
         csrf: document.querySelector('meta[name=csrf-token]').getAttribute('content')
     };
 </script>
-<script src="{{ asset('js/editor.js') }}"></script>
+<script src="{{ asset('js/editor.js') }}?v={{ filemtime(public_path('js/editor.js')) }}"></script>
 </body>
 </html>

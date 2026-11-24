@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LandingController;
+use App\Http\Controllers\WebhookController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,6 +38,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/landings/{landing}/publish', [LandingController::class, 'togglePublish'])->name('landings.publish');
     Route::get('/landings/{landing}/leads', [LandingController::class, 'leads'])->name('landings.leads');
     Route::delete('/landings/{landing}', [LandingController::class, 'destroy'])->name('landings.destroy');
+
+    // Webhook de cada landing: configuración, prueba y reintentos.
+    Route::get('/landings/{landing}/webhook', [WebhookController::class, 'edit'])->name('landings.webhook');
+    Route::put('/landings/{landing}/webhook', [WebhookController::class, 'update'])->name('landings.webhook.update');
+    Route::post('/landings/{landing}/webhook/test', [WebhookController::class, 'test'])->name('landings.webhook.test');
+    Route::post('/landings/{landing}/webhook/secret', [WebhookController::class, 'regenerateSecret'])->name('landings.webhook.secret');
+    Route::post('/webhook-deliveries/{delivery}/retry', [WebhookController::class, 'retry'])->name('webhook.retry');
 
     // Zona de administración: solo para usuarios con rol 'admin'.
     Route::get('/admin', function () {

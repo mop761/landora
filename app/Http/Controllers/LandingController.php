@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Landing;
 use App\Models\Lead;
 use App\Support\LandingRenderer;
+use App\Support\WebhookSender;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -91,14 +92,25 @@ class LandingController extends Controller
      * Solo son públicas las landings publicadas; el propietario puede además
      * previsualizar las suyas en borrador.
      */
-    public function show(Landing $landing)
+    public function show(Request $request, Landing $landing)
     {
         $esPropietario = auth()->check() && auth()->id() === $landing->user_id;
         abort_unless($landing->status === 'published' || $esPropietario, 404);
 
+        // Si la visita llega desde una campaña (?utm_source=...), se guardan las UTM
+        // en campos ocultos del formulario para saber de dónde viene cada lead.
+        $utm = [];
+        foreach (['source', 'medium', 'campaign'] as $clave) {
+            $valor = $request->query('utm_' . $clave);
+            if (is_string($valor) && $valor !== '') {
+                $utm[$clave] = mb_substr($valor, 0, 100);
+            }
+        }
+
         $context = [
             'action' => route('landings.lead', $landing),
             'csrf' => csrf_token(),
+            'utm' => $utm,
         ];
 
         $html = LandingRenderer::render($landing->layout, $context);
@@ -117,17 +129,29 @@ class LandingController extends Controller
         // Solo se capturan leads en landings publicadas.
         abort_unless($landing->status === 'published', 404);
 
-        $data = $request->except(['_token']);
+        // Los campos del formulario; los de control (token y UTM ocultas) van aparte.
+        $data = $request->except(['_token', '_utm_source', '_utm_medium', '_utm_campaign']);
 
         // Si no llega ningún dato, no creamos un lead vacío.
         if (empty($data)) {
             return redirect()->route('landings.show', $landing->slug);
         }
 
-        Lead::create([
+        $lead = Lead::create([
             'landing_id' => $landing->id,
             'data' => $data,
+            'utm_source' => $this->texto($request->input('_utm_source')),
+            'utm_medium' => $this->texto($request->input('_utm_medium')),
+            'utm_campaign' => $this->texto($request->input('_utm_campaign')),
+            'ip' => $request->ip(),
+            'user_agent' => mb_substr((string) $request->userAgent(), 0, 255),
         ]);
+
+        // Si la landing tiene webhook, se le envía el lead. El envío nunca rompe la
+        // captura: si falla, queda registrado y se puede reintentar desde el panel.
+        if ($landing->webhook_url) {
+            WebhookSender::send($landing, $lead, WebhookSender::leadPayload($lead), 'lead.created');
+        }
 
         // Volvemos a la landing con una marca para mostrar el mensaje de gracias.
         return redirect()->route('landings.show', ['landing' => $landing->slug, 'ok' => 1]);
@@ -140,7 +164,7 @@ class LandingController extends Controller
     {
         abort_unless($landing->user_id === auth()->id(), 403);
 
-        $leads = $landing->leads()->latest()->get();
+        $leads = $landing->leads()->with('latestDelivery')->latest()->get();
 
         return view('landings.leads', compact('landing', 'leads'));
     }
@@ -155,6 +179,14 @@ class LandingController extends Controller
         $landing->delete();
 
         return redirect()->route('landings.index')->with('ok', 'Landing eliminada.');
+    }
+
+    /**
+     * Devuelve un texto corto y limpio (máx. 100 caracteres) o null si no es texto.
+     */
+    private function texto($valor): ?string
+    {
+        return (is_string($valor) && trim($valor) !== '') ? mb_substr(trim($valor), 0, 100) : null;
     }
 
     /**

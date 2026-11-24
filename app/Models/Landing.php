@@ -10,6 +10,7 @@ class Landing extends Model
 {
     /**
      * Campos que se pueden asignar de forma masiva.
+     * (webhook_url y webhook_secret se asignan a mano en WebhookController, a propósito.)
      */
     protected $fillable = [
         'user_id',
@@ -43,5 +44,13 @@ class Landing extends Model
     public function leads(): HasMany
     {
         return $this->hasMany(Lead::class);
+    }
+
+    /**
+     * Historial de envíos al webhook de esta landing.
+     */
+    public function webhookDeliveries(): HasMany
+    {
+        return $this->hasMany(WebhookDelivery::class);
     }
 }

@@ -19,6 +19,9 @@ class LandingRenderer
     /** Token CSRF que acompaña al envío del formulario. */
     private static string $csrf = '';
 
+    /** UTM de la visita (source, medium, campaign) que viajan ocultas en el formulario. */
+    private static array $utm = [];
+
     /**
      * Devuelve el HTML de todas las secciones de la landing.
      *
@@ -29,6 +32,7 @@ class LandingRenderer
     {
         self::$formAction = $context['action'] ?? '';
         self::$csrf = $context['csrf'] ?? '';
+        self::$utm = is_array($context['utm'] ?? null) ? $context['utm'] : [];
 
         if (empty($layout['sections']) || ! is_array($layout['sections'])) {
             return '<p style="text-align:center;color:#64748b;padding:60px 24px">'
@@ -283,6 +287,11 @@ class LandingRenderer
         if (self::$formAction !== '') {
             $html = '<form method="POST" action="' . self::esc(self::$formAction) . '" style="' . $styles . '">'
                 . '<input type="hidden" name="_token" value="' . self::esc(self::$csrf) . '">';
+            foreach (['source', 'medium', 'campaign'] as $clave) {
+                if (! empty(self::$utm[$clave]) && is_string(self::$utm[$clave])) {
+                    $html .= '<input type="hidden" name="_utm_' . $clave . '" value="' . self::esc(self::$utm[$clave]) . '">';
+                }
+            }
         } else {
             $html = '<form onsubmit="return false" style="' . $styles . '">';
         }
