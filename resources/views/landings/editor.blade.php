@@ -45,14 +45,6 @@
                 <div class="hint">Pulsa un nombre para seleccionarlo; usa ↑ ↓ para ordenar.</div>
             </div>
             <div class="group">
-                <h3>Plantillas base</h3>
-                <div class="tpl" id="templates">
-                    <button class="tpl-btn" data-tpl="hero">Título + formulario</button>
-                    <button class="tpl-btn" data-tpl="split">Imagen de fondo + texto / formulario</button>
-                </div>
-                <div class="hint">Reemplaza el diseño actual.</div>
-            </div>
-            <div class="group">
                 <h3>CSS personalizado</h3>
                 <textarea class="css" id="customCss" placeholder="/* parche de estilos para esta landing */"></textarea>
             </div>

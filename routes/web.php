@@ -35,6 +35,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/landings', [LandingController::class, 'store'])->name('landings.store');
     Route::get('/landings/{landing}/editor', [LandingController::class, 'edit'])->name('landings.editor');
     Route::put('/landings/{landing}/layout', [LandingController::class, 'updateLayout'])->name('landings.layout');
+    Route::get('/landings/{landing}/settings', [LandingController::class, 'settings'])->name('landings.settings');
+    Route::put('/landings/{landing}/settings', [LandingController::class, 'updateSettings'])->name('landings.settings.update');
     Route::post('/landings/{landing}/publish', [LandingController::class, 'togglePublish'])->name('landings.publish');
     Route::get('/landings/{landing}/leads', [LandingController::class, 'leads'])->name('landings.leads');
     Route::get('/landings/{landing}/analytics', [AnalyticsController::class, 'landing'])->name('landings.analytics');

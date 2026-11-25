@@ -49,11 +49,12 @@
                             <a class="btn-ghost" href="{{ route('landings.leads', $landing) }}">{{ $landing->leads_count }}</a>
                         </td>
                         <td class="right">
-                            <div style="display:inline-flex;gap:8px;align-items:center">
+                            <div class="acciones">
                                 @if ($landing->status === 'published')
                                     <a class="btn-ghost" href="{{ route('landings.show', $landing->slug) }}" target="_blank">Ver</a>
                                 @endif
                                 <a class="btn-ghost" href="{{ route('landings.editor', $landing) }}">Editar</a>
+                                <a class="btn-ghost" href="{{ route('landings.settings', $landing) }}">Ajustes</a>
                                 <a class="btn-ghost" href="{{ route('landings.analytics', $landing) }}">Analítica</a>
                                 <a class="btn-ghost" href="{{ route('landings.webhook', $landing) }}" title="Webhook">Webhook{{ $landing->webhook_url ? ' ✓' : '' }}</a>
                                 <form method="POST" action="{{ route('landings.publish', $landing) }}">

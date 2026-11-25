@@ -38,6 +38,13 @@
         if (el.op != null && el.op < 100) { css += "opacity:" + (el.op / 100) + ";"; }
         return css;
     }
+    // Si el elemento tiene enlace, envuelve su contenido en un <a> (en el editor no navega).
+    function withLink(child, el) {
+        if (!el.link) { return child; }
+        var a = document.createElement("a"); a.href = "javascript:void(0)";
+        a.style.cssText = "color:inherit;text-decoration:" + (el.linkUnderline ? "underline" : "none") + ";";
+        a.appendChild(child); return a;
+    }
     // Una URL solo se usa dentro de url('...') si no trae comillas, paréntesis ni espacios.
     function cssUrl(v) { v = (v || "").trim(); return /^[^'"()\\\s]+$/.test(v) ? v : ""; }
     // Convierte un color hexadecimal en rgba() con la transparencia indicada.
@@ -62,7 +69,7 @@
         return "minmax(0," + r[0] + "fr) minmax(0," + r[1] + "fr)";
     }
 
-    /* ---------------- plantillas ---------------- */
+    /* ---------------- diseño inicial de una landing nueva ---------------- */
     function tHero() {
         return { customCss: "", sections: [
             { id: uid(), cols: 1, ratio: "1-1", colGap: 40, valign: "start", widthMode: "px", widthVal: 640,
@@ -74,31 +81,6 @@
             ] }
         ] };
     }
-    // Imagen de fondo + texto a la izquierda + formulario en tarjeta a la derecha.
-    function tSplit() {
-        return { customCss: "", sections: [
-            { id: uid(), cols: 2, ratio: "3-2", colGap: 48, valign: "start", widthMode: "px", widthVal: 1000,
-                bg: "#0F172A", bgImg: "", bgSize: "cover", bgPos: "center", imgOp: 60, padY: 64, gap: 20, elements: [
-                { id: uid(), col: 0, type: "heading", tag: "h1", text: "FORMAMOS A LOS PROFESIONALES QUE MARCAN LA DIFERENCIA", size: 30, weight: 800, color: "#ffffff", align: "center" },
-                { id: uid(), col: 0, type: "image", src: "", width: 60, align: "center" },
-                { id: uid(), col: 0, type: "text", text: "Un texto de apoyo, separado del resto.", size: 16, color: "#ffffff", align: "center", mt: 40 },
-                { id: uid(), col: 1, type: "form", align: "center", width: 420, title: "Obtén información",
-                    intro: "Rellena el formulario y te contactamos sin compromiso.", titleColor: "#0F172A",
-                    formBg: "#ffffff", formRadius: 18, formPad: 24, labelColor: "#334155",
-                    submitLabel: "Quiero más detalles", buttonBg: "#E11D48", buttonColor: "#ffffff",
-                    fields: [
-                        { label: "Nombre", name: "nombre", type: "text", required: true },
-                        { label: "Apellidos", name: "apellidos", type: "text", required: true },
-                        { label: "Email", name: "email", type: "email", required: true },
-                        { label: "País", name: "pais", type: "pais", required: true },
-                        { label: "Teléfono", name: "telefono", type: "tel", required: true },
-                        { label: "Elige tu máster", name: "master", type: "select", options: "Máster en Marketing\nMáster en Moda\nMáster en IA", required: true },
-                        { label: "He leído y acepto la política de privacidad", name: "privacidad", type: "checkbox", required: true }
-                    ] }
-            ] }
-        ] };
-    }
-    var TEMPLATES = { hero: tHero, split: tSplit };
 
     // Completa los datos que falten (también adapta diseños antiguos con disposición "en fila").
     function normalize(p) {
@@ -140,10 +122,10 @@
         var node;
         if (el.type === "heading") {
             node = document.createElement(el.tag || "h1");
-            node.textContent = el.text; node.style.cssText = styleText(el);
+            node.appendChild(withLink(document.createTextNode(el.text), el)); node.style.cssText = styleText(el);
         } else if (el.type === "text") {
             node = document.createElement("p");
-            node.textContent = el.text; node.style.cssText = styleText(el) + "line-height:1.6;";
+            node.appendChild(withLink(document.createTextNode(el.text), el)); node.style.cssText = styleText(el) + "line-height:1.6;";
         } else if (el.type === "button") {
             var a = document.createElement("a"); a.href = "javascript:void(0)"; a.textContent = el.label;
             a.style.cssText = "display:inline-block;background:" + el.bg + ";color:" + el.color + ";border-radius:" +
@@ -157,7 +139,7 @@
             } else { im = document.createElement("div");
                 im.style.cssText = "display:inline-block;width:" + (el.width || 60) + "%;aspect-ratio:16/9;border-radius:12px;background:linear-gradient(135deg,#93C5FD,#3B82F6);";
             }
-            node.appendChild(im);
+            node.appendChild(withLink(im, el));
         } else if (el.type === "video") {
             // En el editor mostramos una portada (miniatura de YouTube o un recuadro oscuro).
             node = document.createElement("div"); node.style.textAlign = el.align || "center";
@@ -412,9 +394,11 @@
             }
             box.appendChild(field("Color", colorInput(el.color, function (v) { el.color = v; renderCanvas(); })));
             box.appendChild(field("Alineación", alignSeg(el.align, function (v) { el.align = v; renderCanvas(); })));
+            linkProps(box, el, true);
         } else if (el.type === "button") {
             box.appendChild(field("Texto", textInput(el.label, function (v) { el.label = v; renderCanvas(); })));
             box.appendChild(field("Enlace (URL)", textInput(el.href, function (v) { el.href = v; })));
+            box.appendChild(checkRow("Abrir en pestaña nueva", el.linkNewTab, function (v) { el.linkNewTab = v; }));
             var r = h('<div class="row2"></div>');
             r.appendChild(field("Fondo", colorInput(el.bg, function (v) { el.bg = v; renderCanvas(); })));
             r.appendChild(field("Texto", colorInput(el.color, function (v) { el.color = v; renderCanvas(); })));
@@ -425,6 +409,7 @@
             box.appendChild(field("URL de la imagen", textInput(el.src || "", function (v) { el.src = v; renderCanvas(); })));
             box.appendChild(field("Ancho (%)", range(el.width || 60, 10, 100, function (v) { el.width = v; renderCanvas(); })));
             box.appendChild(field("Alineación", alignSeg(el.align || "center", function (v) { el.align = v; renderCanvas(); })));
+            linkProps(box, el, false);
         } else if (el.type === "video") {
             box.appendChild(field("URL del vídeo (YouTube, Vimeo o .mp4)", textInput(el.url || "", function (v) { el.url = v; renderCanvas(); })));
             box.appendChild(field("Ancho (%)", range(el.width || 100, 30, 100, function (v) { el.width = v; renderCanvas(); })));
@@ -511,6 +496,22 @@
         return w;
     }
 
+    // Casilla de verificación con su texto.
+    function checkRow(label, val, on) {
+        var w = h('<label class="mini check-row"><input type="checkbox" ' + (val ? "checked" : "") + '> ' + label + '</label>');
+        w.querySelector("input").onchange = function (e) { on(e.target.checked); };
+        return w;
+    }
+
+    // Enlace opcional de títulos, textos e imágenes: URL + subrayado + pestaña nueva.
+    function linkProps(box, el, conSubrayado) {
+        box.appendChild(field("Enlace (URL, opcional)", textInput(el.link || "", function (v) { el.link = v; renderCanvas(); })));
+        var w = document.createElement("div"); w.className = "prop";
+        if (conSubrayado) { w.appendChild(checkRow("Subrayado (text-decoration)", el.linkUnderline, function (v) { el.linkUnderline = v; renderCanvas(); })); }
+        w.appendChild(checkRow("Abrir en pestaña nueva", el.linkNewTab, function (v) { el.linkNewTab = v; }));
+        box.appendChild(w);
+    }
+
     // Bloque de estilo común a todos los elementos.
     function commonProps(box, el) {
         var head = document.createElement("div"); head.className = "prop";
@@ -592,7 +593,6 @@
 
     /* ---------------- conexiones de eventos ---------------- */
     $("#palette").addEventListener("click", function (e) { var b = e.target.closest("[data-add]"); if (b) { addElement(b.dataset.add); } });
-    $("#templates").addEventListener("click", function (e) { var b = e.target.closest("[data-tpl]"); if (b) { page = normalize(TEMPLATES[b.dataset.tpl]()); sel = null; $("#customCss").value = page.customCss || ""; render(); } });
     $("#device").addEventListener("click", function (e) { var b = e.target.closest("[data-dev]"); if (!b) { return; }
         device = b.dataset.dev; $("#device").querySelectorAll("button").forEach(function (x) { x.classList.toggle("on", x === b); }); renderCanvas(); });
     $("#customCss").addEventListener("input", function () { page.customCss = $("#customCss").value; applyCss(); });

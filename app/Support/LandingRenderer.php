@@ -187,7 +187,7 @@ class LandingRenderer
         $style = 'font-size:' . $size . 'px;font-weight:' . $weight . ';color:' . $color . ';'
             . 'text-align:' . $align . ';margin:0;line-height:1.35;';
 
-        return '<' . $tag . ' style="' . $style . '">' . self::esc($el['text'] ?? '') . '</' . $tag . '>';
+        return '<' . $tag . ' style="' . $style . '">' . self::linkWrap(self::esc($el['text'] ?? ''), $el) . '</' . $tag . '>';
     }
 
     private static function renderText(array $el): string
@@ -199,7 +199,7 @@ class LandingRenderer
         $style = 'font-size:' . $size . 'px;color:' . $color . ';text-align:' . $align . ';'
             . 'margin:0;line-height:1.6;';
 
-        return '<p style="' . $style . '">' . self::esc($el['text'] ?? '') . '</p>';
+        return '<p style="' . $style . '">' . self::linkWrap(self::esc($el['text'] ?? ''), $el) . '</p>';
     }
 
     private static function renderButton(array $el): string
@@ -217,7 +217,7 @@ class LandingRenderer
             . 'font-size:' . $size . 'px;text-decoration:none;';
 
         return '<div style="text-align:' . $align . '">'
-            . '<a href="' . $href . '" style="' . $btn . '">' . $label . '</a></div>';
+            . '<a href="' . $href . '"' . self::target($el) . ' style="' . $btn . '">' . $label . '</a></div>';
     }
 
     private static function renderImage(array $el): string
@@ -235,7 +235,7 @@ class LandingRenderer
                 . 'border-radius:12px;background:linear-gradient(135deg,#93C5FD,#3B82F6)"></div>';
         }
 
-        return '<div style="text-align:' . $align . '">' . $media . '</div>';
+        return '<div style="text-align:' . $align . '">' . self::linkWrap($media, $el) . '</div>';
     }
 
     private static function renderVideo(array $el): string
@@ -447,6 +447,28 @@ class LandingRenderer
         }
 
         return implode(' ', $ok);
+    }
+
+    /**
+     * Envuelve un contenido (texto o imagen) en un enlace si el elemento lo tiene.
+     * La URL pasa por url() (bloquea javascript: y similares); si no es válida, no se enlaza.
+     */
+    private static function linkWrap(string $inner, array $el): string
+    {
+        $raw = is_string($el['link'] ?? null) ? trim($el['link']) : '';
+        $href = $raw !== '' ? self::url($raw) : '#';
+        if ($href === '#') {
+            return $inner;
+        }
+        $style = 'color:inherit;text-decoration:' . (! empty($el['linkUnderline']) ? 'underline' : 'none') . ';';
+
+        return '<a href="' . $href . '"' . self::target($el) . ' style="' . $style . '">' . $inner . '</a>';
+    }
+
+    /** Atributos para abrir en pestaña nueva (rel="noopener" evita que la otra página controle esta). */
+    private static function target(array $el): string
+    {
+        return ! empty($el['linkNewTab']) ? ' target="_blank" rel="noopener noreferrer"' : '';
     }
 
     /** Devuelve $value si está en la lista de valores permitidos; si no, el valor por defecto. */

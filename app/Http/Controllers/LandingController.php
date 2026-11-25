@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Landing;
 use App\Models\Lead;
 use App\Support\LandingRenderer;
+use App\Support\Slugs;
 use App\Support\VisitTracker;
 use App\Support\WebhookSender;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class LandingController extends Controller
 {
@@ -34,12 +37,23 @@ class LandingController extends Controller
             'name' => ['required', 'string', 'max:191'],
         ]);
 
-        Landing::create([
-            'user_id' => auth()->id(),
-            'name' => $data['name'],
-            'slug' => $this->uniqueSlug($data['name']),
-            'status' => 'draft',
-        ]);
+        // Se genera un slug libre. Si justo a la vez otra petición se queda con el mismo,
+        // el índice UNIQUE de la base de datos rechaza el insert: se reintenta (máx. 3 veces).
+        for ($intento = 1; ; $intento++) {
+            try {
+                Landing::create([
+                    'user_id' => auth()->id(),
+                    'name' => $data['name'],
+                    'slug' => Slugs::unico($data['name']),
+                    'status' => 'draft',
+                ]);
+                break;
+            } catch (QueryException $e) {
+                if (! Slugs::esDuplicado($e) || $intento >= 3) {
+                    throw $e;
+                }
+            }
+        }
 
         return redirect()->route('landings.index')->with('ok', 'Landing creada correctamente.');
     }
@@ -68,6 +82,58 @@ class LandingController extends Controller
         $landing->update(['layout' => $data['layout'] ?? []]);
 
         return response()->json(['ok' => true]);
+    }
+
+    /**
+     * Ajustes de la landing: nombre y slug.
+     */
+    public function settings(Landing $landing)
+    {
+        abort_unless($landing->user_id === auth()->id(), 403);
+
+        return view('landings.settings', compact('landing'));
+    }
+
+    /**
+     * Guarda el nombre y el slug. El slug se normaliza ("Máster Moda" -> "master-moda") y se
+     * comprueba que tenga formato válido, que no lo use otra landing y que no esté reservado.
+     */
+    public function updateSettings(Request $request, Landing $landing)
+    {
+        abort_unless($landing->user_id === auth()->id(), 403);
+
+        $request->merge(['slug' => Str::slug((string) $request->input('slug'))]);
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:191'],
+            'slug' => [
+                'required', 'string', 'max:191', 'regex:' . Slugs::FORMATO,
+                Rule::unique('landings', 'slug')->ignore($landing->id),
+                Rule::notIn(Slugs::RESERVADOS),
+            ],
+        ], [
+            'slug.required' => 'El slug no puede quedar vacío: usa letras, números o guiones.',
+            'slug.regex' => 'El slug solo puede tener letras minúsculas, números y guiones.',
+            'slug.unique' => 'Ya existe otra landing con ese slug. Elige otro.',
+            'slug.not_in' => 'Ese slug está reservado por la aplicación (por ejemplo /login). Elige otro.',
+        ]);
+
+        $landing->name = $data['name'];
+        $landing->slug = $data['slug'];
+
+        try {
+            $landing->save();
+        } catch (QueryException $e) {
+            // Otra petición ha ocupado el slug entre la comprobación y el guardado.
+            if (! Slugs::esDuplicado($e)) {
+                throw $e;
+            }
+
+            return back()->withInput()->withErrors(['slug' => 'Ese slug acaba de ocuparse. Prueba con otro.']);
+        }
+
+        return redirect()->route('landings.settings', $landing)
+            ->with('ok', 'Ajustes guardados. Dirección pública: /' . $landing->slug);
     }
 
     /**
@@ -194,21 +260,5 @@ class LandingController extends Controller
     private function texto($valor): ?string
     {
         return (is_string($valor) && trim($valor) !== '') ? mb_substr(trim($valor), 0, 100) : null;
-    }
-
-    /**
-     * Genera un slug único a partir del nombre.
-     */
-    private function uniqueSlug(string $name): string
-    {
-        $base = Str::slug($name) ?: 'landing';
-        $slug = $base;
-        $i = 1;
-
-        while (Landing::where('slug', $slug)->exists()) {
-            $slug = $base . '-' . (++$i);
-        }
-
-        return $slug;
     }
 }

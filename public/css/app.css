@@ -62,7 +62,7 @@ a{color:var(--accent)}
 .btn-ghost{border:1px solid #cbd5e1;background:#fff;color:var(--ink);padding:7px 13px;border-radius:8px;
     font:inherit;font-weight:600;font-size:13px;cursor:pointer;text-decoration:none;display:inline-block}
 .btn-ghost:hover{background:var(--bg)}
-.content{padding:28px 24px;max-width:920px;width:100%;margin:0 auto}
+.content{padding:28px 24px;max-width:1240px;width:100%;margin:0 auto}
 .content h1{font-size:24px;letter-spacing:-.02em;margin:0 0 10px}
 .muted{color:var(--muted)}
 
@@ -125,3 +125,37 @@ a{color:var(--accent)}
     .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
     .grid2{grid-template-columns:1fr}
 }
+
+/* ---- Ajustes de anchura y responsive ---- */
+/* Los botones nunca se parten en dos líneas */
+.btn-ghost,.btn-sm,.btn-del,.badge{white-space:nowrap}
+/* Si una tabla no cabe (móvil), se desplaza en horizontal dentro de su tarjeta en vez de romper la página */
+.card{overflow-x:auto}
+.acciones{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;align-items:center}
+.acciones form{margin:0}
+@media (max-width:700px){
+    /* Menú superior: si no cabe, se desliza en horizontal en vez de salirse de la pantalla */
+    .nav{min-width:0;overflow-x:auto}
+    .nav a{white-space:nowrap}
+    /* Tablas: mantienen su ancho natural y se deslizan dentro de su tarjeta */
+    .tbl td{white-space:nowrap}
+    .acciones{flex-wrap:nowrap;justify-content:flex-start}
+    .content{padding:20px 14px}
+    .inline-form{flex-wrap:wrap}
+    .inline-form input{min-width:0 !important;flex-basis:100%}
+    .topbar{padding:10px 14px}
+    .user{display:none}
+}
+
+/* ---- Formulario de ajustes ---- */
+.form-stack{display:flex;flex-direction:column;gap:6px;max-width:620px}
+.form-stack label{font-size:13px;font-weight:600;margin-top:10px}
+.form-stack input{width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit;font-size:14px}
+.form-stack input:focus{outline:2px solid var(--blue-200);border-color:var(--accent)}
+.form-stack .btn-sm{align-self:flex-start;margin-top:14px}
+.slug-field{display:flex;align-items:stretch;border:1px solid #cbd5e1;border-radius:8px;overflow:hidden}
+.slug-field span{background:var(--bg);color:var(--muted);padding:10px 4px 10px 12px;font-size:14px;white-space:nowrap}
+.slug-field input{border:0;border-radius:0;min-width:0}
+.hint-sm{font-size:12px;color:var(--muted);margin:2px 0 0}
+.warn{background:#fffbeb;color:#92400e;border:1px solid #fde68a;border-radius:8px;padding:9px 11px;font-size:13px;margin-top:8px}
+@media (max-width:700px){ .slug-field span{max-width:45%;overflow:hidden;text-overflow:ellipsis} }
