@@ -22,7 +22,8 @@ Route::get('/', function () {
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     // Máximo 5 intentos de login por minuto (protección contra fuerza bruta).
-    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+    // El tercer parámetro ("login") da a este límite su propio contador.
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1,login');
 });
 
 // Rutas solo para usuarios autenticados.
@@ -64,4 +65,4 @@ Route::middleware('auth')->group(function () {
 // Van al final a propósito: así no interceptan rutas como /login o /dashboard.
 Route::get('/{landing:slug}', [LandingController::class, 'show'])->name('landings.show');
 // Máximo 10 envíos de formulario por minuto desde la misma IP (antispam).
-Route::post('/{landing:slug}', [LandingController::class, 'storeLead'])->middleware('throttle:10,1')->name('landings.lead');
+Route::post('/{landing:slug}', [LandingController::class, 'storeLead'])->middleware('throttle:10,1,leads')->name('landings.lead');
