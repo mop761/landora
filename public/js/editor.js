@@ -134,7 +134,7 @@
         } else if (el.type === "image") {
             node = document.createElement("div"); node.style.textAlign = el.align || "center";
             var im;
-            if (el.src) { im = document.createElement("img"); im.src = el.src; im.alt = "";
+            if (el.src) { im = document.createElement("img"); im.src = el.src; im.alt = el.alt || "";
                 im.style.cssText = "display:inline-block;width:" + (el.width || 60) + "%;height:auto;border-radius:12px;vertical-align:middle;";
             } else { im = document.createElement("div");
                 im.style.cssText = "display:inline-block;width:" + (el.width || 60) + "%;aspect-ratio:16/9;border-radius:12px;background:linear-gradient(135deg,#93C5FD,#3B82F6);";
@@ -407,6 +407,7 @@
             box.appendChild(field("Alineación", alignSeg(el.align, function (v) { el.align = v; renderCanvas(); })));
         } else if (el.type === "image") {
             box.appendChild(field("URL de la imagen", textInput(el.src || "", function (v) { el.src = v; renderCanvas(); })));
+            box.appendChild(field("Texto alternativo (accesibilidad)", textInput(el.alt || "", function (v) { el.alt = v; renderCanvas(); })));
             box.appendChild(field("Ancho (%)", range(el.width || 60, 10, 100, function (v) { el.width = v; renderCanvas(); })));
             box.appendChild(field("Alineación", alignSeg(el.align || "center", function (v) { el.align = v; renderCanvas(); })));
             linkProps(box, el, false);

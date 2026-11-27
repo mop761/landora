@@ -227,7 +227,7 @@ class LandingRenderer
         $src   = isset($el['src']) ? trim((string) $el['src']) : '';
 
         if ($src !== '') {
-            $media = '<img src="' . self::url($src) . '" alt="" '
+            $media = '<img src="' . self::url($src) . '" alt="' . self::esc($el['alt'] ?? '') . '" '
                 . 'style="display:inline-block;width:' . $width . '%;height:auto;border-radius:12px">';
         } else {
             // Marcador de posición cuando aún no hay imagen.
@@ -287,6 +287,10 @@ class LandingRenderer
         if (self::$formAction !== '') {
             $html = '<form method="POST" action="' . self::esc(self::$formAction) . '" style="' . $styles . '">'
                 . '<input type="hidden" name="_token" value="' . self::esc(self::$csrf) . '">';
+            // Campo trampa antispam (honeypot): fuera de la pantalla y oculto a lectores de
+            // pantalla. Una persona no lo rellena; si llega con valor, el servidor descarta el envío.
+            $html .= '<div style="position:absolute;left:-9999px" aria-hidden="true">'
+                . '<input type="text" name="_web" tabindex="-1" autocomplete="off"></div>';
             foreach (['source', 'medium', 'campaign'] as $clave) {
                 if (! empty(self::$utm[$clave]) && is_string(self::$utm[$clave])) {
                     $html .= '<input type="hidden" name="_utm_' . $clave . '" value="' . self::esc(self::$utm[$clave]) . '">';
@@ -328,13 +332,17 @@ class LandingRenderer
         $required = ! empty($f['required']);
         $type     = self::pick($f['type'] ?? 'text', ['text', 'email', 'tel', 'checkbox', 'select', 'pais'], 'text');
 
+        // id del campo: une cada etiqueta con su campo (accesibilidad: al pulsar la etiqueta
+        // se activa el campo y los lectores de pantalla leen la etiqueta correcta).
+        $id = 'campo-' . $name;
+
         if ($type === 'checkbox') {
-            return '<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:' . $labelColor . '">'
-                . '<input type="checkbox" name="' . $name . '"' . ($required ? ' required' : '') . '>'
+            return '<label for="' . $id . '" style="display:flex;align-items:center;gap:8px;font-size:13px;color:' . $labelColor . '">'
+                . '<input type="checkbox" id="' . $id . '" name="' . $name . '"' . ($required ? ' required' : '') . '>'
                 . $label . ($required ? ' *' : '') . '</label>';
         }
 
-        $labelHtml = '<label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:4px;color:' . $labelColor . '">'
+        $labelHtml = '<label for="' . $id . '" style="display:block;font-size:12.5px;font-weight:600;margin-bottom:4px;color:' . $labelColor . '">'
             . $label . ($required ? ' *' : '') . '</label>';
 
         // Desplegable: "pais" usa la lista de países del servidor; "select" usa las
@@ -345,14 +353,14 @@ class LandingRenderer
             foreach ($opciones as $o) {
                 $html .= '<option value="' . self::esc($o) . '">' . self::esc($o) . '</option>';
             }
-            $select = '<select name="' . $name . '"' . ($required ? ' required' : '')
+            $select = '<select id="' . $id . '" name="' . $name . '"' . ($required ? ' required' : '')
                 . ' style="width:100%;padding:9px 11px;border:1px solid #cbd5e1;border-radius:8px;font:inherit;background:#fff">'
                 . $html . '</select>';
 
             return '<div>' . $labelHtml . $select . '</div>';
         }
 
-        $input = '<input type="' . $type . '" name="' . $name . '" placeholder="' . $label . '"'
+        $input = '<input type="' . $type . '" id="' . $id . '" name="' . $name . '" placeholder="' . $label . '"'
             . ($required ? ' required' : '')
             . ' style="width:100%;padding:9px 11px;border:1px solid #cbd5e1;border-radius:8px;font:inherit">';
 

@@ -29,3 +29,6 @@ Thumbs.db
 # Carpeta de salidas de Claude y copias sueltas de archivos de entorno
 /Claude outputs/
 *.env
+
+# Capturas para la documentación (no van al repositorio)
+/_capturas/

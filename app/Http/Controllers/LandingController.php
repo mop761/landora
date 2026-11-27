@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Landing;
 use App\Models\Lead;
 use App\Support\LandingRenderer;
+use App\Support\LeadFields;
 use App\Support\Slugs;
 use App\Support\VisitTracker;
 use App\Support\WebhookSender;
@@ -192,21 +193,42 @@ class LandingController extends Controller
         return view('landings.public', compact('landing', 'html', 'customCss'));
     }
 
+    /** Mensajes de error de la validación de leads (se muestran al visitante). */
+    private const MENSAJES_LEAD = [
+        'required' => 'El campo «:attribute» es obligatorio.',
+        'accepted' => 'Debes marcar «:attribute».',
+        'email' => 'El campo «:attribute» debe ser un email válido.',
+        'in' => 'El valor elegido en «:attribute» no es válido.',
+        'max' => 'El campo «:attribute» es demasiado largo.',
+        'string' => 'El campo «:attribute» no es válido.',
+    ];
+
     /**
      * Guarda un lead enviado desde el formulario público de una landing.
-     * Los campos del formulario son variables (los define el usuario en el editor),
-     * así que recogemos todo lo enviado (menos el token) y lo guardamos como JSON.
      */
     public function storeLead(Request $request, Landing $landing)
     {
         // Solo se capturan leads en landings publicadas.
         abort_unless($landing->status === 'published', 404);
 
-        // Los campos del formulario; los de control (token y UTM ocultas) van aparte.
-        $data = $request->except(['_token', '_utm_source', '_utm_medium', '_utm_campaign']);
+        // Antispam "honeypot": el formulario lleva un campo invisible (_web). Una persona
+        // no lo ve y lo deja vacío; muchos robots rellenan todo. Si llega relleno, se
+        // descarta sin guardar y sin dar pistas (se muestra el mismo "gracias").
+        if ($request->filled('_web')) {
+            return redirect()->route('landings.show', ['landing' => $landing->slug, 'ok' => 1]);
+        }
+
+        // Validación en el servidor según los campos definidos en el editor (LeadFields).
+        // Si algo no cumple, Laravel vuelve a la landing con los errores.
+        // Solo se quedan los campos del formulario: cualquier otro dato enviado se ignora.
+        $data = $request->validate(
+            LeadFields::reglas($landing->layout),
+            self::MENSAJES_LEAD,
+            LeadFields::etiquetas($landing->layout)
+        );
 
         // Si no llega ningún dato, no creamos un lead vacío.
-        if (empty($data)) {
+        if (! array_filter($data, fn ($v) => $v !== null && $v !== '')) {
             return redirect()->route('landings.show', $landing->slug);
         }
 

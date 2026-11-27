@@ -59,7 +59,9 @@ class LandingRendererTest extends TestCase
             ['type' => 'form', 'fields' => [['label' => 'País', 'name' => 'pais', 'type' => 'pais']]],
         ]));
 
-        $this->assertStringContainsString('<select name="pais"', $html);
+        $this->assertStringContainsString('<select id="campo-pais" name="pais"', $html);
+        // La etiqueta está asociada al campo (accesibilidad).
+        $this->assertStringContainsString('<label for="campo-pais"', $html);
         $this->assertStringContainsString('España (+34)', $html);
     }
 
@@ -72,5 +74,7 @@ class LandingRendererTest extends TestCase
 
         $this->assertStringContainsString('name="_token" value="TOKEN123"', $html);
         $this->assertStringContainsString('name="_utm_source" value="google"', $html);
+        // Lleva el campo trampa antispam (honeypot).
+        $this->assertStringContainsString('name="_web"', $html);
     }
 }

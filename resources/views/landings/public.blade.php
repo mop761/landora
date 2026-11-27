@@ -20,6 +20,8 @@
             text-align: center;
             font-weight: 600;
         }
+        .aviso.error { background: #fee2e2; color: #991b1b; text-align: left; font-weight: 400; }
+        .aviso.error ul { margin: 6px 0 0; padding-left: 20px; }
         img, video, iframe { max-width: 100%; }
         /* En móvil, las columnas se apilan una debajo de otra. */
         @media (max-width: 760px) {
@@ -34,7 +36,19 @@
 <body>
     {{-- Mensaje de confirmación tras enviar el formulario --}}
     @if (request()->query('ok'))
-        <div class="aviso">¡Gracias! Hemos recibido tus datos.</div>
+        <div class="aviso" role="status">¡Gracias! Hemos recibido tus datos.</div>
+    @endif
+
+    {{-- Errores de la validación en el servidor (si alguien se salta la del navegador) --}}
+    @if ($errors->any())
+        <div class="aviso error" role="alert">
+            <strong>Revisa el formulario:</strong>
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
     @endif
 
     <main>
