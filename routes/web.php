@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LandingController;
@@ -49,10 +50,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/landings/{landing}/webhook/secret', [WebhookController::class, 'regenerateSecret'])->name('landings.webhook.secret');
     Route::post('/webhook-deliveries/{delivery}/retry', [WebhookController::class, 'retry'])->name('webhook.retry');
 
-    // Zona de administración: solo para usuarios con rol 'admin'.
-    Route::get('/admin', function () {
-        return view('admin');
-    })->middleware('role:admin')->name('admin');
+    // Zona de administración: solo para usuarios con rol 'admin' (middleware propio).
+    Route::middleware('role:admin')->group(function () {
+        Route::get('/admin', [AdminController::class, 'index'])->name('admin');
+        Route::post('/admin/users', [AdminController::class, 'store'])->name('admin.users.store');
+        Route::put('/admin/users/{user}/role', [AdminController::class, 'updateRole'])->name('admin.users.role');
+        Route::delete('/admin/users/{user}', [AdminController::class, 'destroy'])->name('admin.users.destroy');
+    });
 });
 
 // Rutas públicas de la landing (sin login), enlazadas por el slug.
